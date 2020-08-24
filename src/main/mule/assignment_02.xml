@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="8a4c2e00-0270-42ce-b3b6-de3085aec65d" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<file:config name="File_Config" doc:name="File Config" doc:id="34beda68-67de-48b1-9e68-f76fbb1ba508" >
+		<file:connection workingDir="/Users/mounikad/Desktop/mulesoft/day2_assignment/Input" />
+	</file:config>
+	<file:config name="File_Config1" doc:name="File Config" doc:id="e060f8b1-0e36-4c00-a991-8ef6cd0e6e74" >
+		<file:connection workingDir="/Users/mounikad/Desktop/mulesoft/day2_assignment/Output" />
+	</file:config>
+	<flow name="assignment_02Flow" doc:id="39b9859f-9375-4f40-898e-fb3dd9f2bc47" >
+		<http:listener doc:name="Listener" doc:id="2c15720f-bc9d-4feb-b34e-f798cb0a8a58" config-ref="HTTP_Listener_config" path="/assignment-02"/>
+		<file:read doc:name="Read" doc:id="e3903bc4-e98d-4763-9f28-590f4a2cd053" path="/Users/mounikad/Desktop/mulesoft/day2_assignment/Input/input.csv" config-ref="File_Config"/>
+		<ee:transform doc:name="Transform Message" doc:id="af37cfdf-63cb-4a76-a6ac-c1fef5b686c1" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload groupBy $.Course pluck $
+	
+
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="6ce2a2f3-93ff-4495-890b-3af798caccec" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/csv
+---
+payload[0]]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="output2" ><![CDATA[%dw 2.0
+output application/csv
+---
+payload[1]]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<file:write doc:name="Write" doc:id="5a56cbdd-6c4b-4039-959e-d46ada93916f" path="/Users/mounikad/Desktop/mulesoft/day2_assignment/Output/output1.csv" config-ref="File_Config1">
+		</file:write>
+		<file:write doc:name="Write" doc:id="2901e6a0-b74a-48d1-9337-3ae68f33d9bb" config-ref="File_Config1" path="/Users/mounikad/Desktop/mulesoft/day2_assignment/Output/output2.csv">
+			<file:content ><![CDATA[#[vars.output2]]]></file:content>
+		</file:write>
+	</flow>
+</mule>
